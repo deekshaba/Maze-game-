@@ -1,0 +1,309 @@
+#0ne of the problems of artificial intelligence is to solve tortuous games(maze game)
+#it defines the state space has to solve in a variety of ways.To solve this problem and to explain the rules of the game :
+#1.this game can be defined in a finite space so that a space is used for the mainboard
+#2.In this game we consider NxN array of boards.
+#3.The array of rows and columns to rows and columns around the board to be considered
+#4.there is one player who has to collect the treasures by saving himself from the enemies
+#5.here player is in blue colour,treasure is in gold colour and enemies are in red colour
+#6.the path is in black colour where as walls are in white colour
+#7.player is allowed to move forward,backward,upward and downward
+#8.enemies are allowed to move randomly in any direction and as the player comes near he enemies the enemies move faster in the direction of player
+#9.every treasure has 100 points
+
+import turtle
+import math
+import random
+
+wn=turtle.Screen()
+wn.bgcolor("black")
+wn.title("A Maze Game")
+wn.setup(800.800)
+wn.tracer(0)
+
+#register shapes
+#images=["square","circle","circle","circle"]
+#for image in images:
+ #   turtle.register_shape(image)
+
+
+#create pen
+
+class Pen(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("white")
+        self.penup()
+        self.speed(0)
+
+class Player(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("square")
+        self.color("blue")
+        self.penup()
+        self.speed(0)
+        self.gold=0
+
+
+    def go_up(self):
+        #calculate the spot to move
+        move_to_x=self.xcor()
+        move_to_y=self.ycor()+24
+        #check if the space has wall
+        if(move_to_x,move_to_y) not in walls:
+            self.goto(move_to_x,move_to_y)
+
+    def go_down(self):
+        #calculate the spot to move
+        move_to_x=self.xcor()
+        move_to_y=self.ycor()-24
+        #check if the space has wall
+        if(move_to_x,move_to_y) not in walls:
+            self.goto(move_to_x,move_to_y)
+
+        
+
+    def go_left(self):
+        #calculate the spot to move
+        move_to_x=self.xcor()-24
+        move_to_y=self.ycor()
+        #check if the space has wall
+        if(move_to_x,move_to_y) not in walls:
+            self.goto(move_to_x,move_to_y)
+
+        
+    def go_right(self):
+        #calculate the spot to move
+        move_to_x=self.xcor()+24
+        move_to_y=self.ycor()
+        #check if the space has wall
+        if(move_to_x,move_to_y) not in walls:
+            self.goto(move_to_x,move_to_y)
+
+    def is_collision(self,other):
+        a=self.xcor()-other.xcor()
+        b=self.ycor()-other.ycor()
+        distance=math.sqrt((a**2)+(b**2))
+        if distance<5:
+            return(True)
+        else:
+            return(False)
+
+        
+class Treasure(turtle.Turtle):
+    def __init__(self,x,y):
+        turtle.Turtle.__init__(self)
+        self.shape("circle")
+        self.color("gold")
+        self.penup()
+        self.speed(0)
+        self.gold=100
+        self.goto(x,y)
+
+    def destroy(self):
+        self.goto(2000,2000)
+        self.hideturtle()
+
+class Enemy(turtle.Turtle):
+    def __init__(self,x,y):
+        turtle.Turtle.__init__(self)
+        self.shape("circle")
+        self.color("red")
+        self.penup()
+        self.speed(0)
+        self.gold=25
+        self.goto(x,y)
+        self.direction=random.choice(["up","down","left","right"])
+        
+    def move(self):
+        if self.direction=="up":
+            dx=0
+            dy=24
+        elif self.direction=="down":
+            dx=0
+            dy=-24
+        elif self.direction=="left":
+            dx=-24
+            dy=0
+        elif self.direction=="right":
+            dx=24
+            dy=0
+        else:
+            dx=0
+            dy=0
+
+
+        #check if player is close
+            #if so,go in that direction
+        if self.is_close(player):
+            if player.xcor()<self.xcor():
+                self.direction="left"
+            elif player.xcor()>self.xcor():
+                self.direction="right"
+            elif player.ycor()<self.ycor():
+                self.direction="down"
+            elif player.ycor()>self.ycor():
+                self.direction="up"
+        
+        
+    #calculate the spot to move
+        move_to_x=self.xcor()+dx
+        move_to_y=self.ycor()+dy
+
+    #check if the space has wall
+        if(move_to_x,move_to_y) not in walls:
+            self.goto(move_to_x,move_to_y)
+        else:
+            #choose different direction
+            self.direction=random.choice(["up","down","left","right"])
+
+        #set timer to move next time
+        turtle.ontimer(self.move,t=random.randint(100,300))
+
+    def is_close(self,other):
+        a=self.xcor()-other.xcor()
+        b=self.ycor()-other.ycor()
+        distance=math.sqrt((a**2)+(b**2))
+        if distance<75:
+            return True
+        else:
+            return False
+    
+    
+    def destroy(self):
+        self.goto(2000,2000)
+        self.hideturtle()
+    
+
+        
+#Create levels list
+levels = [""]
+ 
+
+
+#define first level
+level_1=[
+    "XXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XP XXXXXXX          XXXXX",
+    "X  XXXXXXX  XXXXXX  XXXXX",      
+    "X       XX  XXXXXX  XXXXX",
+    "X       XX  XXXT       XX",
+    "XXXXXX  XXE XXX        XX",      
+    "XXXXXX  XX  XXXXXX  XXXXX",
+    "XXXXXX  XX    XXXX  XXXXX",     
+    "X TXXXE       XXXX TXXXXX",
+    "X  XXX  XXXXXXXXXXXXXXXXX",
+    "XE        XXXXXXXXXXXXXXX",         
+    "X               TXXXXXXXX",
+    "XXXXXXXXXX       XXXXXXTX",
+    "XXXXXXXXXXXXX    XXXXXX X",
+    "XXX TXXXXXXXX           X",
+    "XXXE                    X",
+    "XXX       XXXXXXXXXXXXXXX",
+    "XXX       XXXXXXXXXXXXXXX",
+    "XXXXXXXX  XXXXXXXXXXXXXXX",
+    "XXXXXXXX               TX",
+    "XX T XXX E              X",
+    "XX   XXXXXXXXXXX    XXXXX",
+    "XX       XXXX    XXXXXXXX",
+    "XXXXX  E              TXX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXX"
+    ]
+
+#add a treasure list
+treasures=[]
+
+#add enemies list
+enemies=[]
+
+#add maze to mazes list
+levels.append(level_1)
+
+
+#create level setup level function
+
+
+def setup_maze(level):
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            #get the charecter at each x and y coordinate
+            #NOTE the order of x and y in next line
+            charecter=level[y][x]
+            #calculate the screen x y coordinate
+            screen_x=-288+(x*24)
+            screen_y=288-(y*24)
+
+            #check if it is an x(representating a wall)
+            if charecter=="X":
+                pen.goto(screen_x,screen_y)
+                pen.shape("square")
+                pen.stamp()
+                
+
+            #add coordinate to wall list
+                walls.append((screen_x,screen_y))
+
+                
+            if charecter=="P":
+                player.goto(screen_x,screen_y)
+
+            #check is it is a Treasure
+            if(charecter=="T"):
+                treasures.append(Treasure(screen_x,screen_y))
+
+            #check if it is an E(representing enemy)
+            if charecter=="E":
+                enemies.append(Enemy(screen_x,screen_y))
+                
+
+#create class instance
+pen=Pen()
+player=Player()
+
+#create wall coordinate list
+
+walls=[]
+
+#set up the level
+setup_maze(levels[1])
+
+
+#keyboard binding
+turtle.listen()
+turtle.onkey(player.go_left,"Left")
+turtle.onkey(player.go_right,"Right")
+turtle.onkey(player.go_up,"Up")
+turtle.onkey(player.go_down,"Down")
+
+#turn off screen updates
+wn.tracer(0)
+
+#start moving enemies
+for enemy in enemies:
+    turtle.ontimer(enemy.move,t=250)
+
+#main game loop
+while True:
+    #check for player collsion with treasure
+    for treasure in treasures:
+        if player.is_collision(treasure):
+            player.gold=player.gold+treasure.gold
+            print("player gold:{}".format(player.gold))
+            treasure.destroy()
+            treasures.remove(treasure)
+
+    #iterate through enemy list to see if the player collides
+    for enemy in enemies:
+        if player.is_collision(enemy):
+            print("player dies!")
+            print("GAME OVER!!")
+            exit(0)
+
+#update screen
+    wn.update()
+    
+
+
+                
+        
